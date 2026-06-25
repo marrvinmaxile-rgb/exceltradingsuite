@@ -29,7 +29,7 @@
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-3xl flex items-center justify-center text-4xl font-bold">E</div>
                     <span class="text-4xl font-bold tracking-tighter">Excel Trading Suite</span>
                 </div>
-                <p class="text-emerald-400">Demo Account • $1,000,000</p>
+                <p class="text-emerald-400">Demo Trading • $1,000,000</p>
             </div>
 
             <div class="flex bg-zinc-900 rounded-3xl p-1 mb-8">
@@ -66,8 +66,13 @@
                 <a onclick="switchTab(2)" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl"><i class="fa-solid fa-list-check"></i> Positions</a>
                 <a onclick="switchTab(3)" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl"><i class="fa-solid fa-history"></i> History</a>
             </nav>
+            <div class="p-4 space-y-2">
+                <button onclick="showDepositModal()" class="w-full py-3 bg-emerald-500 text-black font-bold rounded-2xl">Deposit</button>
+                <button onclick="showWithdrawModal()" class="w-full py-3 bg-zinc-700 hover:bg-zinc-600 rounded-2xl">Withdraw</button>
+            </div>
         </div>
 
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col">
             <!-- Ticker -->
             <div class="h-9 bg-zinc-900 border-b border-zinc-700 overflow-hidden text-sm">
@@ -80,7 +85,7 @@
             </div>
 
             <div class="flex-1 overflow-auto p-6" id="main-content">
-                <!-- Market -->
+                <!-- Market Tab -->
                 <div id="tab-market">
                     <div class="grid grid-cols-12 gap-6">
                         <div class="col-span-8">
@@ -114,8 +119,8 @@
                 <div id="tab-portfolio" class="hidden">
                     <h2 class="text-3xl font-bold mb-6">Portfolio</h2>
                     <div class="glass rounded-3xl p-8">
-                        <div class="text-zinc-400">Total Balance</div>
-                        <div id="total-balance" class="text-5xl font-mono">$1,000,000.00</div>
+                        <div class="text-zinc-400">Total Balance (USDT)</div>
+                        <div id="total-balance" class="text-5xl font-mono font-bold text-emerald-400">$1,000,000</div>
                     </div>
                 </div>
 
@@ -137,6 +142,25 @@
         </div>
     </div>
 
+    <!-- Deposit & Withdraw Modal -->
+    <div id="deposit-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="glass rounded-3xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Deposit</h2>
+            <input id="deposit-amount" type="number" value="100" class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4 text-2xl mb-6">
+            <button onclick="processDeposit()" class="w-full py-5 bg-emerald-500 text-black font-bold rounded-3xl">Konfirmasi Deposit</button>
+            <button onclick="hideDepositModal()" class="w-full py-3 mt-3 text-zinc-400">Batal</button>
+        </div>
+    </div>
+
+    <div id="withdraw-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="glass rounded-3xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Withdraw</h2>
+            <input id="withdraw-amount" type="number" value="50" class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4 text-2xl mb-6">
+            <button onclick="processWithdraw()" class="w-full py-5 bg-red-500 text-white font-bold rounded-3xl">Konfirmasi Withdraw</button>
+            <button onclick="hideWithdrawModal()" class="w-full py-3 mt-3 text-zinc-400">Batal</button>
+        </div>
+    </div>
+
     <script>
         let usdt = 1000000;
         let positions = [];
@@ -144,9 +168,7 @@
         let currentPrice = 67842.35;
         let isBuy = true;
         let chart;
-        let currentUser = null;
 
-        // Auth Functions
         function switchAuthTab(n) {
             document.getElementById('login-form').classList.toggle('hidden', n !== 0);
             document.getElementById('register-form').classList.toggle('hidden', n !== 1);
@@ -158,7 +180,7 @@
             const pass = document.getElementById('reg-pass').value.trim();
             if (!name || !email || !pass) return alert("Semua kolom harus diisi!");
             localStorage.setItem('excelUser', JSON.stringify({name, email, password: pass}));
-            alert("✅ Akun berhasil dibuat! Silakan login.");
+            alert("✅ Akun berhasil dibuat!");
             switchAuthTab(0);
         }
 
@@ -166,10 +188,9 @@
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             const saved = localStorage.getItem('excelUser');
-            if (!saved) return alert("Belum ada akun. Silakan register dulu.");
+            if (!saved) return alert("Belum ada akun. Silakan register.");
             const user = JSON.parse(saved);
             if (user.email === email && user.password === pass) {
-                currentUser = user;
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 initDashboard();
@@ -183,12 +204,11 @@
             initHeader();
             initChart();
             updateBalance();
-            simulatePrice();
+            simulatePriceMovement();
         }
 
         function initTicker() {
-            const t = document.getElementById('live-ticker');
-            t.innerHTML = `BTC 67,842.35 +2.84% &nbsp;&nbsp; ETH 3,412 +1.45% &nbsp;&nbsp; SOL 148.92 -0.8% &nbsp;&nbsp; `;
+            document.getElementById('live-ticker').innerHTML = `BTC 67,842 +2.84% &nbsp;&nbsp; ETH 3,412 +1.45% &nbsp;&nbsp; SOL 149 -0.8% &nbsp;&nbsp; `;
         }
 
         function initHeader() {
@@ -198,8 +218,8 @@
         function initChart() {
             chart = new Chart(document.getElementById('mainChart'), {
                 type: 'line',
-                data: { labels: Array(30).fill(0).map((_,i)=>i), datasets: [{ data: Array(30).fill(67800).map(v=>v+Math.random()*1000), borderColor: '#10b981', tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }}}
+                data: { labels: Array(30).fill(0).map((_,i)=>i), datasets: [{ data: Array(30).fill(67800).map(v => v + Math.random()*1200), borderColor: '#10b981', tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
@@ -215,15 +235,14 @@
 
         function placeOrder() {
             const amount = parseFloat(document.getElementById('amount').value);
-            if (!amount || amount <= 0) return alert("Masukkan jumlah yang valid!");
+            if (!amount) return alert("Masukkan jumlah!");
 
             const total = amount * currentPrice;
-
-            if (isBuy && total > usdt) return alert("Saldo USDT tidak cukup!");
+            if (isBuy && total > usdt) return alert("Saldo tidak cukup!");
 
             if (isBuy) {
                 usdt -= total;
-                positions.push({ symbol: "BTC", amount: amount, entryPrice: currentPrice });
+                positions.push({symbol:"BTC", amount, entryPrice: currentPrice});
             } else {
                 usdt += total;
             }
@@ -232,54 +251,38 @@
                 time: new Date().toLocaleTimeString(),
                 pair: "BTC/USD",
                 type: isBuy ? "BUY" : "SELL",
-                amount: amount.toFixed(4),
-                price: currentPrice.toFixed(2),
-                total: total.toFixed(2)
+                amount: amount,
+                price: currentPrice,
+                total: total
             });
 
             updateBalance();
             renderPositions();
             renderHistory();
-            alert(`✅ ${isBuy ? 'BUY' : 'SELL'} order berhasil dieksekusi!`);
+            alert(`✅ ${isBuy ? 'BUY' : 'SELL'} berhasil!`);
         }
 
         function renderPositions() {
             const container = document.getElementById('positions-container');
-            container.innerHTML = positions.map((pos, i) => {
-                const pnl = ((currentPrice - pos.entryPrice) * pos.amount).toFixed(2);
-                return `
-                    <div class="glass rounded-3xl p-6 flex justify-between items-center">
-                        <div>
-                            <span class="font-semibold">${pos.symbol} Long</span><br>
-                            <span class="text-sm text-zinc-400">${pos.amount} @ ${pos.entryPrice}</span>
-                        </div>
-                        <div class="text-right font-mono ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-                            ${pnl >= 0 ? '+' : ''}$${pnl}
-                        </div>
-                    </div>`;
+            container.innerHTML = positions.map(pos => {
+                const pnl = (currentPrice - pos.entryPrice) * pos.amount;
+                return `<div class="glass rounded-3xl p-6 flex justify-between"><div>BTC Long • ${pos.amount}</div><div class="${pnl>=0?'text-emerald-400':'text-red-400'}">$${pnl.toFixed(2)}</div></div>`;
             }).join('');
         }
 
         function renderHistory() {
             const tbody = document.getElementById('history-body');
             tbody.innerHTML = history.map(h => `
-                <tr class="border-b border-zinc-700">
-                    <td class="py-4">${h.time}</td>
-                    <td>${h.pair}</td>
-                    <td class="${h.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'}">${h.type}</td>
-                    <td>${h.amount}</td>
-                    <td>${h.price}</td>
-                    <td>$${h.total}</td>
-                </tr>
+                <tr class="border-b"><td>${h.time}</td><td>${h.pair}</td><td class="${h.type==='BUY'?'text-emerald-400':'text-red-400'}">${h.type}</td><td>${h.amount}</td><td>${h.price}</td><td>$${h.total}</td></tr>
             `).join('');
         }
 
-        function simulatePrice() {
+        function simulatePriceMovement() {
             setInterval(() => {
-                currentPrice += (Math.random() * 140 - 70);
+                currentPrice += (Math.random() * 160 - 80);
                 document.getElementById('price').textContent = currentPrice.toFixed(2);
                 renderPositions();
-            }, 2500);
+            }, 2800);
         }
 
         function switchTab(n) {
@@ -287,8 +290,35 @@
             document.getElementById(['tab-market','tab-portfolio','tab-positions','tab-history'][n]).classList.remove('hidden');
         }
 
+        function showDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+        function hideDepositModal() { document.getElementById('deposit-modal').classList.add('hidden'); }
+        function showWithdrawModal() { document.getElementById('withdraw-modal').classList.remove('hidden'); }
+        function hideWithdrawModal() { document.getElementById('withdraw-modal').classList.add('hidden'); }
+
+        function processDeposit() {
+            const amt = parseFloat(document.getElementById('deposit-amount').value);
+            if (amt > 0) {
+                usdt += amt;
+                alert(`✅ Deposit $${amt} berhasil!`);
+                updateBalance();
+                hideDepositModal();
+            }
+        }
+
+        function processWithdraw() {
+            const amt = parseFloat(document.getElementById('withdraw-amount').value);
+            if (amt > 0 && amt <= usdt) {
+                usdt -= amt;
+                alert(`✅ Withdraw $${amt} sedang diproses.`);
+                updateBalance();
+                hideWithdrawModal();
+            } else {
+                alert("Saldo tidak cukup!");
+            }
+        }
+
         function logout() {
-            if (confirm("Keluar dari Excel Trading Suite?")) location.reload();
+            if (confirm("Keluar?")) location.reload();
         }
 
         window.onload = () => {};
