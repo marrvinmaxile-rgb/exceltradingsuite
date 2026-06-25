@@ -10,27 +10,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', system-ui, sans-serif; }
-        .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .ticker { animation: ticker 25s linear infinite; }
+        .glass { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .ticker { animation: ticker 30s linear infinite; }
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .price-up { animation: priceUp 0.8s; }
-        .price-down { animation: priceDown 0.8s; }
+        .price-up { animation: priceUp 0.6s; }
+        .price-down { animation: priceDown 0.6s; }
         @keyframes priceUp { 0% { color: #22c55e; transform: scale(1.08); } }
         @keyframes priceDown { 0% { color: #ef4444; transform: scale(0.92); } }
-        .glow-green { box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100">
 
     <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 via-black to-zinc-950">
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black">
         <div class="max-w-md w-full p-8">
             <div class="text-center mb-10">
                 <div class="inline-flex items-center gap-3 mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 via-emerald-500 to-cyan-400 rounded-3xl flex items-center justify-center text-4xl font-bold shadow-xl">E</div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-3xl flex items-center justify-center text-4xl font-bold">E</div>
                     <span class="text-4xl font-bold tracking-tighter">Excel Trading Suite</span>
                 </div>
-                <p class="text-emerald-400 text-lg">Professional Demo Trading Platform</p>
+                <p class="text-emerald-400">Demo Account • $1,000,000</p>
             </div>
 
             <div class="flex bg-zinc-900 rounded-3xl p-1 mb-8">
@@ -38,15 +37,12 @@
                 <button onclick="switchAuthTab(1)" id="register-tab" class="flex-1 py-4 rounded-3xl font-semibold">Register</button>
             </div>
 
-            <!-- Login -->
             <div id="login-form">
                 <input id="login-email" type="email" placeholder="Email" class="w-full mb-4 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4">
-                <input id="login-pass" type="password" placeholder="Password" class="w-full mb-4 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4">
-                <button onclick="showForgotPassword()" class="text-blue-400 text-sm mb-6">Lupa Password?</button>
+                <input id="login-pass" type="password" placeholder="Password" class="w-full mb-6 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4">
                 <button onclick="login()" class="w-full py-5 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-3xl font-bold text-xl">MASUK</button>
             </div>
 
-            <!-- Register -->
             <div id="register-form" class="hidden">
                 <input id="reg-name" type="text" placeholder="Nama Lengkap" class="w-full mb-4 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4">
                 <input id="reg-email" type="email" placeholder="Email" class="w-full mb-4 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4">
@@ -61,8 +57,8 @@
         <!-- Sidebar -->
         <div class="w-72 bg-zinc-900 border-r border-zinc-800 flex flex-col">
             <div class="p-6 border-b flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-3xl flex items-center justify-center text-3xl font-bold shadow-inner">E</div>
-                <span class="text-3xl font-bold tracking-tight">Excel</span>
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-3xl flex items-center justify-center text-3xl font-bold">E</div>
+                <span class="text-3xl font-bold">Excel</span>
             </div>
             <nav class="flex-1 p-4 space-y-1">
                 <a onclick="switchTab(0)" class="tab-btn active flex items-center gap-3 px-4 py-3 rounded-2xl"><i class="fa-solid fa-chart-line"></i> Market</a>
@@ -72,75 +68,55 @@
             </nav>
         </div>
 
-        <!-- Main Area -->
         <div class="flex-1 flex flex-col">
-            <!-- Top Ticker -->
-            <div class="h-10 bg-zinc-900 border-b border-zinc-700 overflow-hidden">
-                <div id="live-ticker" class="ticker flex items-center h-full text-sm whitespace-nowrap"></div>
+            <!-- Ticker -->
+            <div class="h-9 bg-zinc-900 border-b border-zinc-700 overflow-hidden text-sm">
+                <div id="live-ticker" class="ticker flex items-center h-full"></div>
             </div>
 
-            <!-- Header -->
             <div class="h-16 bg-zinc-900 border-b border-zinc-800 px-6 flex items-center justify-between">
-                <div id="asset-header" class="flex items-center gap-8"></div>
-                <div class="flex items-center gap-6">
-                    <span id="market-status" class="text-emerald-400 text-sm flex items-center gap-2"><i class="fa-solid fa-circle text-xs"></i> MARKET OPEN</span>
-                    <button onclick="showNotifications()" class="text-xl"><i class="fa-solid fa-bell"></i></button>
-                    <button onclick="logout()" class="text-red-400 hover:text-red-500">Logout</button>
-                </div>
+                <div id="asset-header" class="flex gap-8"></div>
+                <button onclick="logout()" class="text-red-400">Logout</button>
             </div>
 
             <div class="flex-1 overflow-auto p-6" id="main-content">
-                <!-- Market Tab -->
+                <!-- Market -->
                 <div id="tab-market">
                     <div class="grid grid-cols-12 gap-6">
-                        <!-- Chart -->
                         <div class="col-span-8">
-                            <div class="glass rounded-3xl p-6 glow-green">
+                            <div class="glass rounded-3xl p-6">
                                 <div class="flex justify-between mb-6">
                                     <div>
                                         <div id="symbol" class="text-4xl font-bold">BTC/USD</div>
-                                        <div id="price" class="text-6xl font-mono font-semibold">67,842.35</div>
-                                        <div id="change" class="text-emerald-400 text-xl">+1,874.20 (+2.84%)</div>
+                                        <div id="price" class="text-6xl font-mono font-semibold">67842.35</div>
+                                        <div id="change" class="text-emerald-400 text-xl">+2.84%</div>
                                     </div>
                                 </div>
-                                <div class="h-96">
-                                    <canvas id="mainChart"></canvas>
-                                </div>
+                                <div class="h-96"><canvas id="mainChart"></canvas></div>
                             </div>
                         </div>
 
                         <!-- Order Panel -->
                         <div class="col-span-4">
                             <div class="glass rounded-3xl p-6">
-                                <div class="flex mb-6 border-b border-zinc-700 pb-4">
+                                <div class="flex mb-6">
                                     <button onclick="setOrderType(0)" id="buy-tab" class="flex-1 py-4 bg-emerald-500 text-black font-bold rounded-2xl">BUY</button>
                                     <button onclick="setOrderType(1)" id="sell-tab" class="flex-1 py-4 font-bold rounded-2xl">SELL</button>
                                 </div>
-                                <input id="amount" value="0.15" class="w-full text-center text-4xl font-mono bg-zinc-900 border border-zinc-700 rounded-2xl py-6 mb-6">
-                                <button onclick="placeOrder()" class="w-full py-6 text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl">PLACE ORDER</button>
-                            </div>
-                        </div>
-
-                        <!-- Order Book -->
-                        <div class="col-span-12">
-                            <div class="glass rounded-3xl p-6">
-                                <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-book"></i> Order Book</h3>
-                                <div class="grid grid-cols-2 gap-8" id="order-book"></div>
+                                <input id="amount" value="0.15" class="w-full text-center text-4xl font-mono bg-zinc-900 border border-zinc-700 rounded-2xl py-6">
+                                <button onclick="placeOrder()" class="mt-8 w-full py-6 text-xl font-bold bg-emerald-500 hover:bg-emerald-600 rounded-3xl">PLACE ORDER</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Portfolio Tab -->
+                <!-- Portfolio -->
                 <div id="tab-portfolio" class="hidden">
-                    <h2 class="text-3xl font-bold mb-6">Portfolio Overview</h2>
-                    <div class="grid grid-cols-3 gap-6">
-                        <div class="glass rounded-3xl p-8">
-                            <div class="text-zinc-400">Total Balance</div>
-                            <div id="total-balance" class="text-5xl font-mono font-bold text-emerald-400">$1,000,000</div>
-                        </div>
+                    <h2 class="text-3xl font-bold mb-6">Portfolio</h2>
+                    <div class="glass rounded-3xl p-8">
+                        <div class="text-zinc-400">Total Balance</div>
+                        <div id="total-balance" class="text-5xl font-mono">$1,000,000.00</div>
                     </div>
-                    <canvas id="pieChart" class="h-96 mt-10"></canvas>
                 </div>
 
                 <!-- Positions -->
@@ -152,8 +128,8 @@
                 <!-- History -->
                 <div id="tab-history" class="hidden">
                     <h2 class="text-3xl font-bold mb-6">Trade History</h2>
-                    <table class="w-full font-mono text-sm" id="history-table">
-                        <thead><tr class="border-b"><th class="py-4 text-left">Waktu</th><th>Pair</th><th>Type</th><th>Amount</th><th>Price</th><th>Total</th></tr></thead>
+                    <table class="w-full text-sm font-mono" id="history-table">
+                        <thead><tr class="border-b border-zinc-700"><th class="text-left py-4">Waktu</th><th>Pair</th><th>Type</th><th>Amount</th><th>Price</th><th>Total</th></tr></thead>
                         <tbody id="history-body"></tbody>
                     </table>
                 </div>
@@ -162,8 +138,7 @@
     </div>
 
     <script>
-        let balance = 1000000;
-        let usdt = 998500;
+        let usdt = 1000000;
         let positions = [];
         let history = [];
         let currentPrice = 67842.35;
@@ -171,6 +146,7 @@
         let chart;
         let currentUser = null;
 
+        // Auth Functions
         function switchAuthTab(n) {
             document.getElementById('login-form').classList.toggle('hidden', n !== 0);
             document.getElementById('register-form').classList.toggle('hidden', n !== 1);
@@ -180,8 +156,7 @@
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const pass = document.getElementById('reg-pass').value.trim();
-            if (!name || !email || !pass) return alert("Semua field harus diisi!");
-            
+            if (!name || !email || !pass) return alert("Semua kolom harus diisi!");
             localStorage.setItem('excelUser', JSON.stringify({name, email, password: pass}));
             alert("✅ Akun berhasil dibuat! Silakan login.");
             switchAuthTab(0);
@@ -191,9 +166,7 @@
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             const saved = localStorage.getItem('excelUser');
-            
-            if (!saved) return alert("Belum ada akun. Buat akun dulu.");
-            
+            if (!saved) return alert("Belum ada akun. Silakan register dulu.");
             const user = JSON.parse(saved);
             if (user.email === email && user.password === pass) {
                 currentUser = user;
@@ -205,55 +178,33 @@
             }
         }
 
-        function showForgotPassword() {
-            alert("✅ Link reset password telah dikirim (Demo Mode)");
-        }
-
         function initDashboard() {
-            initLiveTicker();
+            initTicker();
             initHeader();
             initChart();
-            initPieChart();
             updateBalance();
-            simulatePriceMovement();
+            simulatePrice();
         }
 
-        function initLiveTicker() {
-            const ticker = document.getElementById('live-ticker');
-            ticker.innerHTML = `
-                BTC 67,842.35 <span class="text-emerald-400">+2.84%</span> &nbsp;&nbsp;&nbsp;
-                ETH 3,412.80 <span class="text-emerald-400">+1.45%</span> &nbsp;&nbsp;&nbsp;
-                SOL 148.92 <span class="text-red-400">-0.82%</span> &nbsp;&nbsp;&nbsp;
-                AAPL 228.45 <span class="text-emerald-400">+0.94%</span>
-            ` + ticker.innerHTML;
+        function initTicker() {
+            const t = document.getElementById('live-ticker');
+            t.innerHTML = `BTC 67,842.35 +2.84% &nbsp;&nbsp; ETH 3,412 +1.45% &nbsp;&nbsp; SOL 148.92 -0.8% &nbsp;&nbsp; `;
         }
 
         function initHeader() {
-            document.getElementById('asset-header').innerHTML = `
-                <div onclick="switchAsset('BTC')" class="cursor-pointer font-semibold">BTC/USD <span class="font-mono text-emerald-400">67,842</span></div>
-            `;
+            document.getElementById('asset-header').innerHTML = `<div class="font-semibold">BTC/USD</div>`;
         }
 
         function initChart() {
             chart = new Chart(document.getElementById('mainChart'), {
                 type: 'line',
-                data: {
-                    labels: Array(40).fill(0).map((_,i)=>i),
-                    datasets: [{ data: Array(40).fill(0).map(() => 67000 + Math.random()*2500), borderColor: '#10b981', tension: 0.4, borderWidth: 3 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        }
-
-        function initPieChart() {
-            new Chart(document.getElementById('pieChart'), {
-                type: 'doughnut',
-                data: { labels: ['USDT','BTC','ETH'], datasets: [{ data: [65,25,10], backgroundColor: ['#64748b','#f59e0b','#6366f1'] }] }
+                data: { labels: Array(30).fill(0).map((_,i)=>i), datasets: [{ data: Array(30).fill(67800).map(v=>v+Math.random()*1000), borderColor: '#10b981', tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }}}
             });
         }
 
         function updateBalance() {
-            document.getElementById('total-balance').textContent = '$' + balance.toLocaleString();
+            document.getElementById('total-balance').textContent = '$' + usdt.toLocaleString();
         }
 
         function setOrderType(type) {
@@ -264,35 +215,71 @@
 
         function placeOrder() {
             const amount = parseFloat(document.getElementById('amount').value);
-            if (!amount) return alert("Masukkan jumlah!");
+            if (!amount || amount <= 0) return alert("Masukkan jumlah yang valid!");
 
             const total = amount * currentPrice;
+
             if (isBuy && total > usdt) return alert("Saldo USDT tidak cukup!");
 
-            if (isBuy) usdt -= total;
-            else usdt += total;
+            if (isBuy) {
+                usdt -= total;
+                positions.push({ symbol: "BTC", amount: amount, entryPrice: currentPrice });
+            } else {
+                usdt += total;
+            }
 
             history.unshift({
                 time: new Date().toLocaleTimeString(),
                 pair: "BTC/USD",
                 type: isBuy ? "BUY" : "SELL",
-                amount: amount,
-                price: currentPrice,
-                total: total
+                amount: amount.toFixed(4),
+                price: currentPrice.toFixed(2),
+                total: total.toFixed(2)
             });
 
             updateBalance();
-            alert(`✅ ${isBuy ? 'BUY' : 'SELL'} Order berhasil dieksekusi!`);
+            renderPositions();
+            renderHistory();
+            alert(`✅ ${isBuy ? 'BUY' : 'SELL'} order berhasil dieksekusi!`);
         }
 
-        function simulatePriceMovement() {
+        function renderPositions() {
+            const container = document.getElementById('positions-container');
+            container.innerHTML = positions.map((pos, i) => {
+                const pnl = ((currentPrice - pos.entryPrice) * pos.amount).toFixed(2);
+                return `
+                    <div class="glass rounded-3xl p-6 flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold">${pos.symbol} Long</span><br>
+                            <span class="text-sm text-zinc-400">${pos.amount} @ ${pos.entryPrice}</span>
+                        </div>
+                        <div class="text-right font-mono ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                            ${pnl >= 0 ? '+' : ''}$${pnl}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = history.map(h => `
+                <tr class="border-b border-zinc-700">
+                    <td class="py-4">${h.time}</td>
+                    <td>${h.pair}</td>
+                    <td class="${h.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'}">${h.type}</td>
+                    <td>${h.amount}</td>
+                    <td>${h.price}</td>
+                    <td>$${h.total}</td>
+                </tr>
+            `).join('');
+        }
+
+        function simulatePrice() {
             setInterval(() => {
-                currentPrice += (Math.random() * 180 - 90);
-                const priceEl = document.getElementById('price');
-                priceEl.textContent = currentPrice.toFixed(2);
-                priceEl.classList.add(Math.random() > 0.5 ? 'price-up' : 'price-down');
-                setTimeout(() => priceEl.classList.remove('price-up', 'price-down'), 800);
-            }, 2800);
+                currentPrice += (Math.random() * 140 - 70);
+                document.getElementById('price').textContent = currentPrice.toFixed(2);
+                renderPositions();
+            }, 2500);
         }
 
         function switchTab(n) {
@@ -300,12 +287,8 @@
             document.getElementById(['tab-market','tab-portfolio','tab-positions','tab-history'][n]).classList.remove('hidden');
         }
 
-        function showNotifications() {
-            alert("🛎️ Market Update:\n• BTC sedang bullish\n• Gunakan saldo demo dengan bijak");
-        }
-
         function logout() {
-            if (confirm("Keluar dari platform?")) location.reload();
+            if (confirm("Keluar dari Excel Trading Suite?")) location.reload();
         }
 
         window.onload = () => {};
